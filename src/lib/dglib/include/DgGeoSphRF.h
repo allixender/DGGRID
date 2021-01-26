@@ -25,11 +25,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DGGEOSPHRF_H 
+#ifndef DGGEOSPHRF_H
 #define DGGEOSPHRF_H
 
 #include "DgEllipsoidRF.h"
 #include "DgContCartRF.h"
+#include "DgConstants.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 class DgGeoSphRF : public DgEllipsoidRF {
@@ -39,25 +40,25 @@ class DgGeoSphRF : public DgEllipsoidRF {
       DgGeoSphRF (DgRFNetwork& networkIn, const string& nameIn = "GeodeticSph",
                   long double earthRadiusKMin = DEFAULT_RADIUS_KM)
          : DgEllipsoidRF (networkIn, nameIn, earthRadiusKMin * 1000L,
-                earthRadiusKMin * 1000L) 
-           { 
-              earthRadiusKM_ = earthRadiusKMin; 
+                earthRadiusKMin * 1000L)
+           {
+              earthRadiusKM_ = earthRadiusKMin;
               icosaEdgeRads_ = M_ATAN2;
               icosaEdgeDegs_ = icosaEdgeRads_ * M_180_PI;
               icosaEdgeKM_ = icosaEdgeRads_ * earthRadiusKM_;
               totalAreaKM_ = 4.0L * M_PI * earthRadiusKM_ * earthRadiusKM_;
            }
 
-      DgGeoSphRF (const DgGeoSphRF& rf) 
+      DgGeoSphRF (const DgGeoSphRF& rf)
          : DgEllipsoidRF(rf) { /* earthRadius_ = rf.earthRadius(); */ }
 
       DgGeoSphRF& operator= (const DgGeoSphRF& rf)
-         { DgEllipsoidRF::operator=(rf); 
+         { DgEllipsoidRF::operator=(rf);
            return *this; }
 
       // distance between locations in radians
       virtual long double gcDist (const DgLocation& loc1, const DgLocation& loc2) const
-         { 
+         {
             DgLocation tmp1(loc1);
             DgLocation tmp2(loc2);
             convert(&tmp1);
@@ -73,11 +74,11 @@ class DgGeoSphRF : public DgEllipsoidRF {
       virtual long double dist (const DgGeoCoord& add1, const DgGeoCoord& add2) const
          { return earthRadiusKM() * DgGeoCoord::gcDist(add1, add2); }
 
-      static long double earthRadiusKM (void) { return earthRadiusKM_; } 
-      static long double icosaEdgeKM   (void) { return icosaEdgeKM_; } 
-      static long double icosaEdgeDegs (void) { return icosaEdgeDegs_; } 
-      static long double icosaEdgeRads (void) { return icosaEdgeRads_; } 
-      static long double totalAreaKM   (void) { return totalAreaKM_; } 
+      static long double earthRadiusKM (void) { return earthRadiusKM_; }
+      static long double icosaEdgeKM   (void) { return icosaEdgeKM_; }
+      static long double icosaEdgeDegs (void) { return icosaEdgeDegs_; }
+      static long double icosaEdgeRads (void) { return icosaEdgeRads_; }
+      static long double totalAreaKM   (void) { return totalAreaKM_; }
 
       // midpoint of great circle connecting two points
       static DgGeoCoord midPoint(const DgGeoCoord& p1, const DgGeoCoord& p2);
@@ -108,7 +109,7 @@ class DgGeoSphDegRF : public DgContCartRF {
 
    public:
 
-      DgGeoSphDegRF (const DgGeoSphRF& geoRFin, 
+      DgGeoSphDegRF (const DgGeoSphRF& geoRFin,
                      const string& nameIn = "GeodeticSphDeg");
 
       const DgGeoSphRF& geoRF (void) const { return geoRF_; }

@@ -1,5 +1,5 @@
 //
-// this is an adapted version of the projects.h file in Gerald Evenden's 
+// this is an adapted version of the projects.h file in Gerald Evenden's
 // USGS PROJ4 projection system
 // Version 6.1 - Kevin Sahr, 5/23/13
 ////////////////////////////////////////////////////////////////////////////////
@@ -9,11 +9,21 @@
 
 #include <stdlib.h>
 #include "DgUtil.h"
+
 /*
 #ifdef __cplusplus
 extern "C" {
 #endif
 */
+
+#include <math.h>
+
+// if it doesn't work then we define these manually
+#ifndef _USE_MATH_DEFINES
+    #define _MATH_DEFINES_DEFINED
+
+    #define M_PI_2     1.57079632679489661923000000000000000000L
+#endif
 
 /* prototype hypot for systems where absent */
 
@@ -49,4 +59,3 @@ long double pj_authlat(long double, long double *);
 */
 
 #endif
-
