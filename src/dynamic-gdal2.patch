@@ -1,14 +1,8 @@
---- MakeIncludes	2021-01-25 17:18:12.412406897 +0200
-+++ MakeIncludes.diff	2021-01-25 17:20:41.340298717 +0200
-@@ -9,9 +9,9 @@
- # brew.sh).
- 
- # location of GDAL header files
--GDAL_HDR_DIR = /opt/local/include
-+GDAL_HDR_DIR = $(shell gdal-config --cflags)
- # location of libgdal.a
--GDAL_LIB = /opt/local/lib/libgdal.dylib
-+GDAL_LIB = $(shell gdal-config --libs)
- 
- ### most users won't need to change anything below ###
- 
+12c12
+< GDAL_HDR_DIR = /opt/local/include
+---
+> GDAL_HDR_DIR = $(shell gdal-config --cflags | cut -c 3- )
+14c14
+< GDAL_LIB = /opt/local/lib/libgdal.dylib
+---
+> GDAL_LIB = $(shell gdal-config --libs)

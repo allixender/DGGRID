@@ -9,7 +9,7 @@
 # brew.sh).
 
 # location of GDAL header files
-GDAL_HDR_DIR = $(shell gdal-config --cflags)
+GDAL_HDR_DIR = $(shell gdal-config --cflags | cut -c 3- )
 # location of libgdal.a
 GDAL_LIB = $(shell gdal-config --libs)
 
