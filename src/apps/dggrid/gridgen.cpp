@@ -882,13 +882,6 @@ void outputCell (GridGenParam& dp, const DgIDGGSBase& dggs, const DgIDGGBase& dg
 
    delete tmpLoc;
 
-/* interleaved coord not currently used
-   tmpLoc = new DgLocation(add2D);
-   dgg.intRF().convert(tmpLoc);
-   DgInterleaveCoord intCoord = *dgg.intRF().getAddress(*tmpLoc);
-   delete tmpLoc;
-*/
-         
    if (dp.megaVerbose) 
       cout << "accepted " << label << " " << add2D << endl;
 
@@ -962,6 +955,15 @@ void outputCellAdd2D (GridGenParam& dp, const DgIDGGSBase& dggs,
    else
       label = new string(dgg::util::to_string(sn));
 
+   // create the interleaved index
+   DgLocation* interLoc = new DgLocation(add2D);
+   dgg.intRF().convert(interLoc);
+   DgInterleaveCoord interCoord = *dgg.intRF().getAddress(*interLoc);
+cout << "INTERLEAVE: " << *interLoc << " " << interCoord << endl;
+   delete interLoc;
+
+   label = new string(dgg::util::to_string(interCoord));
+         
    outputCell(dp, dggs, dgg, add2D, verts, deg, *label);
    delete label;
 
