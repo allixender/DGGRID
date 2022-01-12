@@ -518,7 +518,7 @@ cout << "rs2 " << rs2 << endl;
    {
      if (IDGG().isClassI()) addstr = addstr + string("0");
      else addstr = addstr + string("1");
-     addstr != string(":");
+     addstr += string(":");
    }
 
 cout << "addstr pre-index: " << addstr << endl;
