@@ -1,0 +1,51 @@
+INFO:conda_build.source:Source cache directory is: C:\bld\src_cache
+Source cache directory is: C:\bld\src_cache
+Downloading source to cache: v7.7_1dd7491979.tar.gz
+INFO:conda_build.source:Downloading source to cache: v7.7_1dd7491979.tar.gz
+Downloading https://github.com/sahrk/DGGRID/archive/v7.7.tar.gz
+INFO:conda_build.source:Downloading https://github.com/sahrk/DGGRID/archive/v7.7.tar.gz
+INFO:conda_build.source:Success
+Success
+Extracting download
+source tree in: C:\bld\dggrid_1675451092902\work
+Rewriting env in output: {'BUILD_PREFIX': 'C:\\bld\\dggrid_1675451092902\\_build_env',
+ 'PREFIX': 'C:\\bld\\dggrid_1675451092902\\_h_env',
+ 'SRC_DIR': 'C:\\bld\\dggrid_1675451092902\\work'}
+
+(base) %SRC_DIR%>IF "" == "" (call %SRC_DIR%\build_env_setup.bat ) 
+
+(base) %SRC_DIR%>set "CONDA_BUILD=1" 
+
+(base) %SRC_DIR%>set "PYTHONNOUSERSITE=1" 
+
+(base) %SRC_DIR%>set "CONDA_DEFAULT_ENV=%PREFIX%" 
+
+(base) %SRC_DIR%>set "ARCH=64" 
+
+(base) %SRC_DIR%>set "PREFIX=%PREFIX%" 
+
+(base) %SRC_DIR%>set "BUILD_PREFIX=%BUILD_PREFIX%" 
+
+(base) %SRC_DIR%>set "SYS_PREFIX=C:\Miniforge" 
+
+(base) %SRC_DIR%>set "SYS_PYTHON=C:\Miniforge\python.exe" 
+
+(base) %SRC_DIR%>set "SUBDIR=win-64" 
+
+(base) %SRC_DIR%>set "build_platform=win-64" 
+
+(base) %SRC_DIR%>set "SRC_DIR=%SRC_DIR%" 
+
+(base) %SRC_DIR%>set "ROOT=C:\Miniforge" 
+
+(base) %SRC_DIR%>set "CONDA_PY=39" 
+
+(base) %SRC_DIR%>set "PY3K=1" 
+
+(base) %SRC_DIR%>set "PY_VER=3.9" 
+
+NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\nmake.exe"' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\nmake.exe"' : return code '0x2'
+Stop.
+
