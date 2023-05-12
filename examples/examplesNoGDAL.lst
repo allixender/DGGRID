@@ -8,6 +8,8 @@ gridgenMixedSHP
 gridgenPureKML
 hiRes
 icosahedron
+isea4d
+isea4t
 isea7hGen
 mixedAperture
 planetRiskTable
@@ -15,3 +17,10 @@ seqnums
 superfundGrid
 table
 transform
+z3CellClip
+z3Nums
+z3Transform
+z3WholeEarth
+zCellClip
+zNums
+zTransform

@@ -39,9 +39,8 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 BinPresenceParam::BinPresenceParam (DgParamList& plist)
-      : MainParam(plist), wholeEarth (true), outFile (0), outSeqNum (false),
-        inputDelimiter (' '), outputDelimiter (' '), outputAllCells (true)
-{ 
+      : MainParam(plist), wholeEarth (true), outFile (0), outputAllCells (true)
+{
       /////// fill state variables from the parameter list //////////
 
       string dummy;
@@ -55,7 +54,7 @@ BinPresenceParam::BinPresenceParam (DgParamList& plist)
 
       string inFileStr;
       getParamValue(plist, "input_files", inFileStr, false);
-  
+
       char* names = new char[inFileStr.length() + 1];
       inFileStr.copy(names, string::npos);
       names[inFileStr.length()] = 0;
@@ -68,37 +67,9 @@ BinPresenceParam::BinPresenceParam (DgParamList& plist)
       }
       delete [] names;
 
-      // input delimiter
-
-      getParamValue(plist, "input_delimiter", dummy, false);
-      if (dummy.length() != 3 || dummy.c_str()[0] != '"' ||
-          dummy.c_str()[2] != '"')
-      {
-         ::report(
-          "invalid input_delimiter; must be a single char in double quotes",
-          DgBase::Fatal);
-      }
-      inputDelimiter = dummy.c_str()[1];
-
       // output file name
 
       getParamValue(plist, "output_file_name", outFileNameBase, false);
-
-      // output address type
-
-      getParamValue(plist, "output_address_type", outAddType, false);
-
-      // output delimiter
-
-      getParamValue(plist, "output_delimiter", dummy, false);
-      if (dummy.length() != 3 || dummy.c_str()[0] != '"' ||
-          dummy.c_str()[2] != '"')
-      {
-         ::report(
-          "invalid output_delimiter; must be a single char in double quotes",
-          DgBase::Fatal);
-      }
-      outputDelimiter = dummy.c_str()[1];
 
       // cell_output_control
 
@@ -122,7 +93,7 @@ void BinPresenceParam::dump (void)
    MainParam::dump();
 
    dgcout << "BEGIN BINPRESENCE PARAMETER DUMP" << endl;
-   
+
    dgcout << " wholeEarth: " << wholeEarth << endl;
    dgcout << " outFileNameBase: " << outFileNameBase << endl;
    dgcout << " outFileName: " << outFileName << endl;
@@ -137,14 +108,9 @@ void BinPresenceParam::dump (void)
    for (unsigned int i = 0; i < inputFiles.size(); i++)
       dgcout << "  " << i << " " << inputFiles[i] << endl;
 
-   dgcout << " outAddType: " << outAddType << endl;
-   dgcout << " outSeqNum: " << outSeqNum << endl;
-   dgcout << " inputDelimiter: " << inputDelimiter << endl;
-   dgcout << " outputDelimiter: " << outputDelimiter << endl;
-   dgcout << " inFormatStr: " << inFormatStr << endl;
    dgcout << " outputAllCells: " << outputAllCells << endl;
    dgcout << " outputCount: " << ((outputCount) ? "true" : "false") << endl;
-   
+
    dgcout << "END BINPRESENCE PARAMETER DUMP" << endl;
 
 } // void BinPresenceParam::dump
@@ -157,8 +123,8 @@ void binPresGlobal (BinPresenceParam& dp)
    DgRFNetwork net0;
    const DgGeoSphRF& geoRF = *(DgGeoSphRF::makeRF(net0, dp.datum, dp.earthRadius));
    const DgIDGGSBase *idggs = DgIDGGSBase::makeRF(net0, geoRF, dp.vert0,
-             dp.azimuthDegs, dp.aperture, dp.actualRes+1, dp.gridTopo, 
-             dp.gridMetric, "IDGGS", dp.projType, dp.isMixed43, dp.numAp4, 
+             dp.azimuthDegs, dp.aperture, dp.actualRes+2, dp.gridTopo,
+             dp.gridMetric, "IDGGS", dp.projType, dp.isMixed43, dp.numAp4,
              dp.isSuperfund, dp.isApSeq, dp.apSeq);
    const DgIDGGBase& dgg = idggs->idggBase(dp.actualRes);
 
@@ -168,35 +134,17 @@ void binPresGlobal (BinPresenceParam& dp)
    DgGeoSphDegRF::makeRF(geoRF, geoRF.name() + "Deg");
 
    // set-up the output reference frame
-
-   dp.outSeqNum = false;
-   const DgRFBase* pOutRF = NULL;
-   if (dp.outAddType == "PROJTRI") pOutRF = &dgg.projTriRF();
-   else if (dp.outAddType == "VERTEX2DD") pOutRF = &dgg.vertexRF();
-   else if (dp.outAddType == "Q2DD") pOutRF = &dgg.q2ddRF();
-   else if (dp.outAddType == "INTERLEAVE") pOutRF = &dgg.intRF();
-   else if (dp.outAddType == "PLANE") pOutRF = &dgg.planeRF();
-   else if (dp.outAddType == "Q2DI") pOutRF = &dgg;
-   else if (dp.outAddType == "SEQNUM") 
-   {
-      dp.outSeqNum = true;
-      pOutRF = &dgg;
-   }
-   else
-   {
-      ::report("binPresGlobal(): invalid output_address_type " + 
-               dp.outAddType, DgBase::Fatal);
-   }
-
-   const DgRFBase& outRF = *pOutRF;
+   MainParam::addressTypeToRF(dp, dgg, false);
+   if (!dp.pOutRF)
+      ::report("binPresGlobal(): invalid output RF", DgBase::Fatal);
+   const DgRFBase& outRF = *dp.pOutRF;
 
    // create an array to store the values
 
    int nClasses = (int) dp.inputFiles.size();
    //bool** vals = new (bool (*[dgg.bndRF().size()]));
    bool** vals = new bool*[dgg.bndRF().size()];
-   for (unsigned long int i = 0; i < dgg.bndRF().size(); i++) 
-   {
+   for (unsigned long int i = 0; i < dgg.bndRF().size(); i++) {
       vals[i] = new bool[nClasses];
       for (int j = 0; j < nClasses; j++) vals[i][j] = false;
    }
@@ -221,7 +169,7 @@ void binPresGlobal (BinPresenceParam& dp)
          result = sscanf(buff, dp.inFormatStr.c_str(), &lon, &lat);
          if (result != 2)
          {
-            ::report("binPresGlobal(): invalid format in file " + 
+            ::report("binPresGlobal(): invalid format in file " +
                      dp.inputFiles[fc], DgBase::Fatal);
          }
 
@@ -239,7 +187,7 @@ void binPresGlobal (BinPresenceParam& dp)
 
    ///// output the values /////
 
-   for (unsigned long int i = 0; i < dgg.bndRF().size(); i++) 
+   for (unsigned long int i = 0; i < dgg.bndRF().size(); i++)
    {
       int count = 0;
       for (int j = 0; j < nClasses; j++) if (vals[i][j]) count++;
@@ -259,7 +207,7 @@ void binPresGlobal (BinPresenceParam& dp)
       }
 
       if (dp.outputCount) *dp.outFile << count << dp.outputDelimiter;
-      for (int j = 0; j < nClasses; j++) 
+      for (int j = 0; j < nClasses; j++)
          *dp.outFile << ((vals[i][j]) ? 1 : 0);
       *dp.outFile << endl;
    }
@@ -293,8 +241,8 @@ void binPresPartial (BinPresenceParam& dp)
    DgRFNetwork net0;
    const DgGeoSphRF& geoRF = *(DgGeoSphRF::makeRF(net0, dp.datum, dp.earthRadius));
       const DgIDGGSBase *idggs = DgIDGGSBase::makeRF(net0, geoRF, dp.vert0,
-             dp.azimuthDegs, dp.aperture, dp.actualRes+1, dp.gridTopo, 
-             dp.gridMetric, "IDGGS", dp.projType, dp.isMixed43, dp.numAp4, 
+             dp.azimuthDegs, dp.aperture, dp.actualRes+2, dp.gridTopo,
+             dp.gridMetric, "IDGGS", dp.projType, dp.isMixed43, dp.numAp4,
              dp.isSuperfund, dp.isApSeq, dp.apSeq);
       const DgIDGGBase& dgg = idggs->idggBase(dp.actualRes);
 
@@ -304,27 +252,10 @@ void binPresPartial (BinPresenceParam& dp)
    DgGeoSphDegRF::makeRF(geoRF, geoRF.name() + "Deg");
 
    // set-up the output reference frame
-
-   dp.outSeqNum = false;
-   const DgRFBase* pOutRF = NULL;
-   if (dp.outAddType == "PROJTRI") pOutRF = &dgg.projTriRF();
-   else if (dp.outAddType == "VERTEX2DD") pOutRF = &dgg.vertexRF();
-   else if (dp.outAddType == "Q2DD") pOutRF = &dgg.q2ddRF();
-   else if (dp.outAddType == "INTERLEAVE") pOutRF = &dgg.intRF();
-   else if (dp.outAddType == "PLANE") pOutRF = &dgg.planeRF();
-   else if (dp.outAddType == "Q2DI") pOutRF = &dgg;
-   else if (dp.outAddType == "SEQNUM") 
-   {
-      dp.outSeqNum = true;
-      pOutRF = &dgg;
-   }
-   else
-   {
-      ::report("binPresPartial(): invalid output_address_type " + 
-               dp.outAddType, DgBase::Fatal);
-   }
-
-   const DgRFBase& outRF = *pOutRF;
+   MainParam::addressTypeToRF(dp, dgg, false);
+   if (!dp.pOutRF)
+      ::report("binPresPartial(): invalid output RF", DgBase::Fatal);
+   const DgRFBase& outRF = *dp.pOutRF;
 
    // create a place to store the values by quad
 
@@ -360,7 +291,7 @@ void binPresPartial (BinPresenceParam& dp)
          result = sscanf(buff, dp.inFormatStr.c_str(), &lon, &lat);
          if (result != 2)
          {
-            ::report("binPresPartial(): invalid format in file " + 
+            ::report("binPresPartial(): invalid format in file " +
                       dp.inputFiles[fc], DgBase::Fatal);
          }
 
@@ -390,7 +321,7 @@ void binPresPartial (BinPresenceParam& dp)
    {
       QuadVals& qv = qvals[q];
       if (!qv.isUsed) continue;
-      
+
       qv.upperRight = qv.upperRight - qv.offset; // make relative
 
       qv.numI = (int) qv.upperRight.i() + 1;
@@ -399,7 +330,7 @@ void binPresPartial (BinPresenceParam& dp)
       for (int i = 0; i < qv.numI; i++)
       {
          qv.vals[i] = new bool*[qv.numJ];
-         
+
          for (int j = 0; j < qv.numJ; j++)
          {
             qv.vals[i][j] = new bool[nClasses];
@@ -425,7 +356,7 @@ void binPresPartial (BinPresenceParam& dp)
          result = sscanf(buff, dp.inFormatStr.c_str(), &lon, &lat);
          if (result != 2)
          {
-            ::report("binPresPartial(): invalid format in file " + 
+            ::report("binPresPartial(): invalid format in file " +
                       dp.inputFiles[fc], DgBase::Fatal);
          }
 
@@ -452,11 +383,11 @@ void binPresPartial (BinPresenceParam& dp)
       for (int i = 0; i < nClasses; i++) dummy[i] = false;
 
       bool* vvec;
-      for (unsigned long int i = 0; i < dgg.bndRF().size(); i++) 
+      for (unsigned long int i = 0; i < dgg.bndRF().size(); i++)
       {
          unsigned long int sNum = i + 1;
          DgLocation* tloc = dgg.bndRF().locFromSeqNum(sNum);
-         
+
          // check to see if there is a value for this cell
          count = 0;
          vvec = dummy;
@@ -466,25 +397,25 @@ void binPresPartial (BinPresenceParam& dp)
          {
             DgIVec2D coord = dgg.getAddress(*tloc)->coord() - qv.offset;
             if (coord.i() >= 0 && coord.j() >= 0 &&
-                coord.i() <= qv.upperRight.i() && 
-                coord.j() <= qv.upperRight.j()) 
+                coord.i() <= qv.upperRight.i() &&
+                coord.j() <= qv.upperRight.j())
             {
               vvec = qv.vals[coord.i()][coord.j()];
-              for (int k = 0; k < nClasses; k++) if (vvec[k]) count++; 
+              for (int k = 0; k < nClasses; k++) if (vvec[k]) count++;
             }
          }
-            
+
          // output the value
 
          if (dp.outSeqNum)
             *dp.outFile << sNum << dp.outputDelimiter;
          else
          {
-            DgLocation* tloc = dgg.bndRF().locFromSeqNum(sNum);
+            //DgLocation* tloc = dgg.bndRF().locFromSeqNum(sNum);
             outRF.convert(tloc);
             *dp.outFile << tloc->asString(dp.outputDelimiter)
                         << dp.outputDelimiter;
-            delete tloc;
+            //delete tloc;
          }
 
          if (dp.outputCount) *dp.outFile << count << dp.outputDelimiter;
@@ -535,7 +466,7 @@ void binPresPartial (BinPresenceParam& dp)
          }
       }
    }
-   
+
 
    ///// clean-up /////
 
@@ -543,7 +474,7 @@ void binPresPartial (BinPresenceParam& dp)
    {
       QuadVals& qv = qvals[q];
       if (!qv.isUsed) continue;
-      
+
       for (int i = 0; i < qv.numI; i++)
       {
          for (int j = 0; j < qv.numJ; j++) delete [] qv.vals[i][j];
@@ -567,17 +498,17 @@ void doBinPresence (BinPresenceParam& dp, DgGridPList& plist)
       // first get the grid placement
 
       dp.outFileName = dp.outFileNameBase;
-      dp.metaOutFileName = dp.metaOutFileNameBase; 
+      dp.metaOutFileName = dp.metaOutFileNameBase;
 
       orientGrid(dp, plist);
 
-      if (dp.numGrids > 1) 
+      if (dp.numGrids > 1)
       {
          string suffix = string(".") + dgg::util::to_string(dp.curGrid, 4);
          dp.metaOutFileName = dp.metaOutFileName + suffix;
          dp.outFileName = dp.outFileName + suffix;
       }
-      
+
       /////// open the output file as applicable //////
 
       dp.outFile = new ofstream();
@@ -585,7 +516,7 @@ void doBinPresence (BinPresenceParam& dp, DgGridPList& plist)
       dp.outFile->setf(ios::fixed, ios::floatfield);
       dp.outFile->precision(dp.precision);
 
-      if (dp.numGrids > 1 || dp.placeRandom) 
+      if (dp.numGrids > 1 || dp.placeRandom)
       {
          ofstream metaOutFile;
          metaOutFile.open(dp.metaOutFileName.c_str());

@@ -276,7 +276,7 @@ void processOneClipPoly (DgPolygon& polyIn, GridGenParam& dp, const DgIDGGBase& 
                   DgClippingHole clipHole;
 
                   // check if all vertices are on this quad
-                  const DgRFBase* rf = NULL;
+                  //const DgRFBase* rf = NULL;
                   if (numVertsInQuad == theHole.size()) {
                      clipHole.isGnomonic = false; // use snyder
                      dgg.q2ddRF().convert(theHole);
@@ -295,7 +295,7 @@ void processOneClipPoly (DgPolygon& polyIn, GridGenParam& dp, const DgIDGGBase& 
                   } else {
                      clipHole.isGnomonic = true; // use gnomonic
                      cr.gnomProj().convert(theHole);
-                     rf = &cr.gnomProj();
+                     //rf = &cr.gnomProj();
                   }
 
                   OGRPolygon* ogrPoly = DgOutGdalFile::createPolygon(theHole);
@@ -625,9 +625,41 @@ void createClipRegions (GridGenParam& dp, const DgIDGGBase& dgg,
       // get the clipping cell dgg resolution
       const DgIDGGBase& clipDgg = dgg.dggs()->idggBase(dp.clipCellRes);
 
+      // parse the input clipping cells
+      vector<string> clipCellAddressStrs;
+      dgg::util::ssplit(dp.clipCellsStr, clipCellAddressStrs);
+
+//cout << "INRF: " << *dp.pInRF << endl;
+//cout << "CLIPDGG: " << clipDgg << endl;
+      // the coarse clipping cells
+      // use a set to avoid duplicates
+      set<unsigned long int> clipSeqNums;
+      // parse the clip cell sequence numbers
+      for (const auto &seqStr: clipCellAddressStrs) {
+
+         unsigned long int sNum = 0;
+         if (dp.inSeqNum) {
+            if (sscanf(seqStr.c_str(), "%lu", &sNum) != 1)
+               ::report("gridgen(): invalid cell sequence number in clip_cell_addresses" +
+                         string(seqStr), DgBase::Fatal);
+         } else { // must be indexToPoly
+            // parse the address
+            DgLocation* tmpLoc = NULL;
+            tmpLoc = new DgLocation(*dp.pInRF);
+            tmpLoc->fromString(seqStr.c_str(), dp.inputDelimiter);
+            clipDgg.convert(tmpLoc);
+
+            sNum = static_cast<const DgIDGGBase&>(clipDgg).bndRF().seqNum(*tmpLoc);
+            delete tmpLoc;
+         }
+
+         clipSeqNums.insert(sNum);
+//cout << " sNum: " << sNum << endl;
+      }
+
       // add the cell boundaries to the clip regions
-      for (set<unsigned long int>::iterator i = dp.clipSeqNums.begin();
-             i != dp.clipSeqNums.end(); i++){
+      for (set<unsigned long int>::iterator i = clipSeqNums.begin();
+             i != clipSeqNums.end(); i++){
 
         DgLocation* loc = static_cast<const DgIDGG&>(clipDgg).bndRF().locFromSeqNum(*i);
 //cout << " clip seq num " << *i << " " << *loc << endl;
@@ -717,8 +749,10 @@ void createClipRegions (GridGenParam& dp, const DgIDGGBase& dgg,
 
    if (!dgg.isCongruent()) {
       for (int q = 1; q < 11; q++) {
-         if (dp.verbosity > 0) dgcout << "Checking OVERAGE quad " << q << endl;
          if (!clipRegions[q].isQuadUsed()) continue;
+
+         if (dp.verbosity > 0)
+            dgcout << "Checking OVERAGE quad " << q << endl;
 
          // check for over J
 

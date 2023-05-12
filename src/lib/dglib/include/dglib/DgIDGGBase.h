@@ -25,12 +25,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DGIDGGBASE_H 
+#ifndef DGIDGGBASE_H
 #define DGIDGGBASE_H
 
 #include <dglib/DgIDGGutil.h>
 
 class DgIDGGSBase;
+class DgZ3RF;
+class DgZ3StringRF;
+class DgZOrderRF;
+class DgZOrderStringRF;
 
 using namespace dgg::topo;
 
@@ -45,11 +49,11 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
 
    public:
 
-      static const DgIDGGBase* makeRF (const DgIDGGSBase* dggs, const DgGeoSphRF& geoRFIn, 
-                  unsigned int apertureIn, int resIn, const string& nameIn = "IDGG", 
+      static const DgIDGGBase* makeRF (const DgIDGGSBase* dggs, const DgGeoSphRF& geoRFIn,
+                  unsigned int apertureIn, int resIn, const string& nameIn = "IDGG",
                   DgGridTopology gridTopo = Hexagon, DgGridMetric gridMetric = D6,
                   unsigned int precisionIn = DEFAULT_PRECISION)
-         { return new DgIDGGBase (dggs, geoRFIn, apertureIn, resIn, nameIn, 
+         { return new DgIDGGBase (dggs, geoRFIn, apertureIn, resIn, nameIn,
                   gridTopo, gridMetric, precisionIn); }
 
       virtual ~DgIDGGBase();
@@ -86,13 +90,20 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       const DgVertex2DDRF&  vertexRF  (void) const { return *vertexRF_; }
       const DgQ2DDRF&       q2ddRF    (void) const { return *q2ddRF_; }
       const DgBoundedIDGG&  bndRF     (void) const { return *bndRF_; }
-      const DgInterleaveRF& intRF     (void) const { return *intRF_; }
       const DgPlaneTriRF&   planeRF   (void) const { return *planeRF_; }
+
+      // these are only defined for aperture 3 so must be NULL-able
+      const DgZ3RF*       z3RF     (void) const { return z3RF_; }
+      const DgZ3StringRF* z3StrRF  (void) const { return z3StrRF_; }
+
+      // these are only defined for aperture 3 and 4 so must be NULL-able
+      const DgZOrderRF*       zorderRF     (void) const { return zorderRF_; }
+      const DgZOrderStringRF* zorderStrRF  (void) const { return zorderStrRF_; }
 
       const DgContCartRF&   ccFrame (void) const { return *ccFrame_; }
       const DgDiscRF2D&     grid2D  (void) const { return *grid2D_; }
 
-      unsigned int          precision (void) const { return precision_; } 
+      unsigned int          precision (void) const { return precision_; }
 
       const DgGridStats& gridStats (void) const { return gridStats_; }
 
@@ -100,18 +111,18 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
         { precision_ = precisionIn;
           gridStats_.setPrecision(precision()); }
 
-      virtual string add2str (const DgQ2DICoord& add) const 
+      virtual string add2str (const DgQ2DICoord& add) const
                  { return string(add); }
 
-      virtual string add2str (const DgQ2DICoord& add, char delimiter) const 
-        { return dgg::util::to_string(add.quadNum()) + delimiter + 
-                 dgg::util::to_string(add.coord().i()) + delimiter + 
+      virtual string add2str (const DgQ2DICoord& add, char delimiter) const
+        { return dgg::util::to_string(add.quadNum()) + delimiter +
+                 dgg::util::to_string(add.coord().i()) + delimiter +
                  dgg::util::to_string(add.coord().j()); }
 
-      virtual const char* str2add (DgQ2DICoord* add, const char* str, 
+      virtual const char* str2add (DgQ2DICoord* add, const char* str,
                                    char delimiter) const;
 
-      virtual const DgQ2DICoord& undefAddress (void) const 
+      virtual const DgQ2DICoord& undefAddress (void) const
                             { return DgQ2DICoord::undefDgQ2DICoord; }
 
       virtual void setVertices (const DgLocation& loc, DgPolygon& vec,
@@ -127,7 +138,7 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       // we'll give dummy definitions for these since some of our IDGG's may
       // not have defined these yet
 
-      virtual long long int dist (const DgQ2DICoord&, const DgQ2DICoord&) const 
+      virtual long long int dist (const DgQ2DICoord&, const DgQ2DICoord&) const
            {
               report(string("DgIDGGBase::dist() this method has not been defined "
                      "for DgIDGGBase ") + this->name(), DgBase::Fatal);
@@ -136,10 +147,10 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
            }
 
       virtual void setAddNeighbors (const DgQ2DICoord& add,
-                                    DgLocVector& vec) const; 
+                                    DgLocVector& vec) const;
 
       virtual void setAddNeighborsBdry2 (const DgQ2DICoord& add,
-                                    DgLocVector& vec) const; 
+                                    DgLocVector& vec) const;
 
       // give dummy definitions; these will not be used but will be
       // overridden by series converters
@@ -155,8 +166,8 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
 
    protected:
 
-      DgIDGGBase (const DgIDGGSBase* dggs, const DgGeoSphRF& geoRFIn, 
-                  unsigned int apertureIn, int resIn, const string& nameIn = "IDGG", 
+      DgIDGGBase (const DgIDGGSBase* dggs, const DgGeoSphRF& geoRFIn,
+                  unsigned int apertureIn, int resIn, const string& nameIn = "IDGG",
                   DgGridTopology gridTopo = Hexagon, DgGridMetric gridMetric = D6,
                   unsigned int precisionIn = DEFAULT_PRECISION);
 
@@ -206,8 +217,13 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       const DgVertex2DDRF* vertexRF_;
       const DgQ2DDRF* q2ddRF_;
       const DgBoundedIDGG* bndRF_;
-      const DgInterleaveRF* intRF_;
       const DgPlaneTriRF* planeRF_;
+
+      // possible I/O RFs
+      const DgZOrderRF*       zorderRF_;
+      const DgZOrderStringRF* zorderStrRF_;
+      const DgZ3RF*       z3RF_;
+      const DgZ3StringRF* z3StrRF_;
 
    friend class DgQ2DItoDConverter;
    friend class DgQ2DDtoIConverter;

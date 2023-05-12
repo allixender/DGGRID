@@ -12,6 +12,8 @@ gridgenPureKML
 hiRes
 holes
 icosahedron
+isea4d
+isea4t
 isea7hGen
 mixedAperture
 planetRiskGridGen
@@ -23,3 +25,12 @@ seqnums
 superfundGrid
 table
 transform
+z3Collection
+z3Nums
+z3Transform
+z3CellClip
+z3WholeEarth
+zCellClip
+zCollection
+zNums
+zTransform

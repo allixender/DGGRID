@@ -49,8 +49,8 @@ class DgOutGdalFile : public DgOutLocFile
       static OGRLinearRing* createLinearRing (const DgPolygon& poly);
       static OGRPolygon*    createPolygon (const DgPolygon& poly);
 
-      DgOutGdalFile(const DgGeoSphDegRF& rf, const std::string& filename = "", 
-               const std::string& gdalDriver = "GeoJSON", 
+      DgOutGdalFile(const DgGeoSphDegRF& rf, const std::string& filename = "",
+               const std::string& gdalDriver = "GeoJSON",
                DgOutGdalFileMode mode = InvalidMode, int precision = 7,
                bool isPointFile = false, DgReportLevel failLevel = DgBase::Fatal);
 
@@ -74,8 +74,9 @@ class DgOutGdalFile : public DgOutLocFile
 
       // collection output
       virtual DgOutLocFile& insert (const DgIDGGBase& dgg, DgCell& cell,
-                      bool outputPoint, bool outputRegion, 
-                      const DgLocVector* neighbors, const DgLocVector* children);
+           bool outputPoint, bool outputRegion, const DgIDGGBase& chdDgg,
+           const DgRFBase* outRF, const DgRFBase* chdOutRF,
+           const DgLocVector* neighbors, const DgLocVector* children);
 
       virtual void setFormatStr(void) { }
 
@@ -87,9 +88,11 @@ class DgOutGdalFile : public DgOutLocFile
 
       OGRFeature* createFeature (const string& label) const;
       OGRPoint* createPoint (const DgLocation& loc) const;
+      //OGRPolygon createPolygon (const DgPolygon& poly) const;
       OGRGeometryCollection* createCollection (const DgCell& cell) const;
-      void createSeqnumsProperty (const DgIDGGBase& dgg, OGRFeature* feature,
-           const char* fieldName, const DgLocVector& vec);
+
+      void createAddressesProperty (const DgIDGGBase& dgg, OGRFeature* feature,
+           const char* fieldName, const DgLocVector& vec, const DgRFBase* outRF);
 
       void addFeature (OGRFeature *feature);
 
