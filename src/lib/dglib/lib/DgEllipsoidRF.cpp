@@ -22,6 +22,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <dglib/DgEllipsoidRF.h>
 #include <dglib/DgGeoSphRF.h>
 #include <dglib/DgPolygon.h>
