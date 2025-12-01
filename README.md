@@ -2,7 +2,7 @@
 
 ## General Information
 
-__DGGRID__ version 8.42 released September 21, 2025
+__DGGRID__ version 8.43 released December 1, 2025
 https://github.com/sahrk/DGGRID
 
 __Southern Terra Cognita Laboratory__  
