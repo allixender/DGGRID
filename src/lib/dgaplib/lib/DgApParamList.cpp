@@ -120,13 +120,16 @@ DgApParamList::setParam (const string& nameIn, const string& strValIn, bool fail
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-DgApParamList::setPresetParam (const string& nameIn, const string& strValIn)
+DgApParamList::setPresetParam (const string& nameIn, const string& strValIn, bool failSilent)
 {
    if (toLower(strValIn) == string("invalid")) return;
 
    DgApAssoc* existing = getParam(nameIn, false);
    if (!existing) {
-      report(string("DgApParamList::setPresetParam() unknown parameter ")
+      if (failSilent)
+          return;
+      else
+         report(string("DgApParamList::setPresetParam() unknown parameter ")
              + nameIn, DgBase::Fatal);
    } else { // already exists
       // only change value if it was not set explicitly by the user

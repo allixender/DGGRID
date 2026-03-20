@@ -135,7 +135,8 @@ class DgApParamList {
 
       void setParam (const string& nameIn, const string& strValIn, bool fail = true);
 
-      void setPresetParam (const string& nameIn, const string& strValIn);
+      void setPresetParam (const string& nameIn, const string& strValIn,
+                           bool failSilent = false);
 
       void insertParam (DgApAssoc* param); // does not make a copy
 

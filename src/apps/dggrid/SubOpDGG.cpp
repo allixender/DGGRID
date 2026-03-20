@@ -404,7 +404,7 @@ SubOpDGG::setupOp (void)
          pList().setPresetParam("dggs_proj", "FULLER");
          pList().setPresetParam("dggs_num_aperture_4_res", "2");
          pList().setPresetParam("dggs_aperture_type", "MIXED43");
-         pList().setPresetParam("output_cell_label_type", "SUPERFUND");
+         pList().setPresetParam("output_cell_label_type", "SUPERFUND", true);
       } else if (tmplc == "planetrisk") {
          pList().setPresetParam("dggs_topology", "HEXAGON");
          pList().setPresetParam("dggs_proj", "ISEA");
@@ -417,13 +417,13 @@ SubOpDGG::setupOp (void)
          pList().setPresetParam("dggs_aperture_type", "PURE");
          pList().setPresetParam("dggs_aperture", "7");
          pList().setPresetParam("dggs_res_spec", "9");
-         pList().setPresetParam("input_address_type", "HIERNDX");
-         pList().setPresetParam("input_hier_ndx_system", "Z7");
-         pList().setPresetParam("input_hier_ndx_form", "INT64");
-         pList().setPresetParam("output_cell_label_type", "OUTPUT_ADDRESS_TYPE");
-         pList().setPresetParam("output_address_type", "HIERNDX");
-         pList().setPresetParam("output_hier_ndx_system", "Z7");
-         pList().setPresetParam("output_hier_ndx_form", "INT64");
+         pList().setPresetParam("input_address_type", "HIERNDX", true);
+         pList().setPresetParam("input_hier_ndx_system", "Z7", true);
+         pList().setPresetParam("input_hier_ndx_form", "INT64", true);
+         pList().setPresetParam("output_cell_label_type", "OUTPUT_ADDRESS_TYPE", true);
+         pList().setPresetParam("output_address_type", "HIERNDX", true);
+         pList().setPresetParam("output_hier_ndx_system", "Z7", true);
+         pList().setPresetParam("output_hier_ndx_form", "INT64", true);
       } else {
          // get the topology
          char topo = tmplc[tmplc.length() - 1];
@@ -549,6 +549,7 @@ SubOpDGG::setupOp (void)
 
    string dummy;
    getParamValue(pList(), "dggs_orient_specify_type", dummy, false);
+   dummy = dgg::util::toUpper(dummy);
    if (dummy == string("SPECIFIED"))
       placeRandom = false;
    else if (dummy == string("REGION_CENTER")) {
